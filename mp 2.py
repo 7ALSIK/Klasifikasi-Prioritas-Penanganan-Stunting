@@ -14,6 +14,43 @@ ambang_sedang = 0.50
 
 tanda_anomali = ["1", "1.0", "true", "ya", "yes"]
 
+akun = {
+    "hanif alfi": "2610931029",
+    "shaloom nadhira utami muliawan": "2610933038",
+    "yogi andika": "2610933034",
+    "ardaffa yazid ilmany": "2610932036",
+}
+batas_login = 3
+
+
+def tampil_cover():
+    garis = "=" * 60
+    print(garis)
+    print("PROGRAM KLASIFIKASI PRIORITAS PENANGANAN WILAYAH".center(60))
+    print("Berdasarkan Stunting, Kemiskinan, dan IPM".center(60))
+    print("Metode Simple Additive Weighting (SAW)".center(60))
+    print(garis)
+    print("Mini Project Praktikum Programa Komputer 2026".center(60))
+    print("Laboratorium Sistem Informasi dan Keputusan".center(60))
+    print("Departemen Teknik Industri, Universitas Andalas".center(60))
+    print(garis)
+
+
+def login():
+    kesempatan = batas_login
+    while kesempatan > 0:
+        print("\n===== LOGIN =====")
+        username = " ".join(input("Username : ").split()).lower()
+        password = input("Password : ").strip()
+
+        if username in akun and akun[username] == password:
+            print("Login berhasil. Selamat datang,", username.title() + "!")
+            return True
+
+        kesempatan -= 1
+        print("Username atau password salah. Sisa kesempatan:", kesempatan)
+    return False
+
 
 def baca_data(nama):
     if not os.path.exists(nama):
@@ -225,52 +262,84 @@ def tampil_masalah(masalah):
     print("Jumlah data bermasalah:", len(masalah))
 
 
-def tampil_parameter(hasil):
-    print("Stunting terbesar   :", max([h["stunting"] for h in hasil]))
-    print("Kemiskinan terbesar :", max([h["miskin"] for h in hasil]))
-    print("IPM terkecil        :", min([h["ipm"] for h in hasil]))
-    print("Bobot tiap kriteria :", round(bobot_stunting, 4))
-    print("Status Tinggi jika V >=", ambang_tinggi)
-    print("Status Sedang jika V >=", ambang_sedang, ", selain itu Rendah")
+def input_data_baru():
+    print("\n===== TAMBAH DATA WILAYAH =====")
+    provinsi = input("Provinsi                : ").strip().upper()
+    kabkota = input("Kabupaten/Kota          : ").strip()
+    stunting = input("Persentase stunting (%) : ").strip()
+    miskin = input("Persentase miskin (%)   : ").strip()
+    ipm = input("IPM                     : ").strip()
+
+    return {
+        "PROVINSI": provinsi,
+        "KABKOTA": kabkota,
+        "PCT_STUNTING_2018": stunting,
+        "PCT_MISKIN_2018": miskin,
+        "IPM_2018": ipm,
+        "FLAG_ANOMALI": "",
+    }
+
+
+def tampil_data_baru(hasil, baru):
+    for h in hasil:
+        if h["provinsi"].lower() == baru["PROVINSI"].lower() and h["kabkota"].lower() == baru["KABKOTA"].lower():
+            tabel([h])
+            print(f"Data berhasil ditambahkan: peringkat {h['peringkat']} dari {len(hasil)}, status {h['status']}.")
+            print("Catatan: nilai V semua wilayah dihitung ulang karena data bertambah.")
 
 
 if __name__ == "__main__":
-    data = baca_data(nama_file)
-    masalah = []
-    hasil = proses(data, masalah)
+    tampil_cover()
 
-    if len(hasil) == 0:
-        print("Tidak ada data yang bisa diproses.")
+    if not login():
+        print("Kesempatan login habis. Program dihentikan.")
     else:
-        print("Jumlah wilayah yang diklasifikasikan:", len(hasil))
-        print("Jumlah data bermasalah:", len(masalah))
+        data = baca_data(nama_file)
+        masalah = []
+        hasil = proses(data, masalah)
 
-        while True:
-            print("\n===== PRIORITAS PENANGANAN STUNTING (METODE SAW) =====")
-            print("1. Tampilkan peringkat dan status")
-            print("2. Rekap jumlah wilayah per status")
-            print("3. Daftar wilayah berstatus Tinggi")
-            print("4. Cari berdasarkan provinsi")
-            print("5. Laporan data bermasalah")
-            print("6. Parameter SAW")
-            print("0. Keluar")
+        if len(hasil) == 0:
+            print("Tidak ada data yang bisa diproses.")
+        else:
+            print("Jumlah wilayah yang diklasifikasikan:", len(hasil))
+            print("Jumlah data bermasalah:", len(masalah))
 
-            menu = input("Pilih menu: ").strip()
+            while True:
+                print("\n===== PRIORITAS PENANGANAN STUNTING (METODE SAW) =====")
+                print("1. Tampilkan peringkat dan status")
+                print("2. Rekap jumlah wilayah per status")
+                print("3. Daftar wilayah berstatus Tinggi")
+                print("4. Cari berdasarkan provinsi")
+                print("5. Laporan data bermasalah")
+                print("6. Tambah data wilayah")
+                print("0. Keluar")
 
-            if menu == "1":
-                tabel(hasil)
-            elif menu == "2":
-                tampil_rekap_status(hasil)
-            elif menu == "3":
-                tampil_tinggi(hasil)
-            elif menu == "4":
-                tampil_cari_provinsi(hasil)
-            elif menu == "5":
-                tampil_masalah(masalah)
-            elif menu == "6":
-                tampil_parameter(hasil)
-            elif menu == "0":
-                print("Terima kasih telah menggunakan program!")
-                break
-            else:
-                print("Menu tidak tersedia.")
+                menu = input("Pilih menu: ").strip()
+
+                if menu == "1":
+                    tabel(hasil)
+                elif menu == "2":
+                    tampil_rekap_status(hasil)
+                elif menu == "3":
+                    tampil_tinggi(hasil)
+                elif menu == "4":
+                    tampil_cari_provinsi(hasil)
+                elif menu == "5":
+                    tampil_masalah(masalah)
+                elif menu == "6":
+                    baru = input_data_baru()
+                    masalah_coba = []
+                    hasil_coba = proses(data + [baru], masalah_coba)
+
+                    if len(hasil_coba) > len(hasil):
+                        data.append(baru)
+                        hasil = hasil_coba
+                        masalah = masalah_coba
+                        tampil_data_baru(hasil, baru)
+                    else:
+                        print("Data ditolak ->", masalah_coba[-1])
+                elif menu == "0":
+                    print("Terima kasih telah menggunakan program!")
+                    break
+                else:
+                    print("Menu tidak tersedia.")
